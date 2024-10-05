@@ -1,5 +1,4 @@
 import React from 'react' // Import React để sử dụng JSX và các tính năng của React.
-import FilterHeading from './filter-heading/index' 
 import MainTable from './Table'
 // Import component FilterHeading từ thư mục `filter-heading`. Đây có thể là một component dùng để lọc bảng dữ liệu blog.
 
