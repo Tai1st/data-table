@@ -1,5 +1,5 @@
 import { Resident, columns } from "./columns"
-import { DataTable } from "../../ui/data-table"
+import { DataTable } from "./data-table"
 
 
   async function getData(): Promise<Resident[]> {
