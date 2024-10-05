@@ -96,7 +96,7 @@ export function DataTable<TData, TValue>({
             }
             className='max-w-sm'
           />
-          <Button onClick={refreshData} className='bg-blue-500 text-white'>
+          <Button onClick={refreshData} className=' ml-2 bg-blue-500 text-white'>
             Refresh Data
           </Button>
         </div>
