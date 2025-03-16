@@ -7,7 +7,7 @@ export default function HomePage() {
   const locationInputRef = useRef<HTMLInputElement>(null);
   const messageRef = useRef<HTMLDivElement>(null);
 
-  // Hàm lấy vị trí qua Geolocation của trình duyệt
+  // Function to get location using the browser's Geolocation API
   const getLocation = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -29,7 +29,7 @@ export default function HomePage() {
     }
   };
 
-  // Hàm mở link vị trí từ ô VỊ TRÍ MAP
+  // Function to open the location link in a new tab
   const openLocationLink = () => {
     const link = locationInputRef.current?.value;
     if (link && link.startsWith("http")) {
@@ -39,29 +39,28 @@ export default function HomePage() {
     }
   };
 
-  // Hàm chuyển đổi FormData thành chuỗi URL-encoded
+  // Converts FormData to URL-encoded query string
   const formDataToQueryString = (formData: FormData): string => {
     const keyValuePairs: string[] = [];
     for (let pair of formData.entries()) {
       keyValuePairs.push(
-        encodeURIComponent(pair[0]) +
-          "=" +
-          encodeURIComponent(String(pair[1]))
+        encodeURIComponent(pair[0]) + "=" + encodeURIComponent(String(pair[1]))
       );
     }
     return keyValuePairs.join("&");
   };
 
-  // Hàm tìm kiếm bản ghi dựa trên SỐ CĂN CƯỚC
+  // Search for a record based on "SỐ CĂN CƯỚC"
   const searchRecord = () => {
     if (!formRef.current) return;
     const form = formRef.current;
-    const soCanCuoc = (form.elements["SỐ CĂN CƯỚC"] as HTMLInputElement).value;
+    // Use namedItem to safely access the form element
+    const soCanCuoc = (form.elements.namedItem("SỐ CĂN CƯỚC") as HTMLInputElement).value;
     if (!soCanCuoc) {
       alert("Vui lòng nhập SỐ CĂN CƯỚC để tìm kiếm.");
       return;
     }
-    // Cập nhật endpointUrlSearch theo dịch vụ của bạn
+    // Update endpointUrlSearch to your actual endpoint
     const endpointUrlSearch =
       "https://script.google.com/macros/s/AKfycbxQRQgb2DGZpOly9_wV1jHK_I8U0g_p2n_r8WkX7DsSyrabRDNPx1C7eQyDS-v2OPVZCg/exec";
     const params =
@@ -70,16 +69,13 @@ export default function HomePage() {
       .then((response) => response.json())
       .then((data) => {
         if (data) {
-          // Điền dữ liệu vào form, chuyển đổi "NĂM SINH" sang định dạng YYYY-MM-DD nếu cần
           for (let key in data) {
             if (data.hasOwnProperty(key) && form.elements[key]) {
               const element = form.elements[key] as HTMLInputElement | HTMLSelectElement;
               if (key === "NĂM SINH") {
                 const dateObj = new Date(data[key]);
                 if (!isNaN(dateObj.getTime())) {
-                  const month = (dateObj.getMonth() + 1)
-                    .toString()
-                    .padStart(2, "0");
+                  const month = (dateObj.getMonth() + 1).toString().padStart(2, "0");
                   const day = dateObj.getDate().toString().padStart(2, "0");
                   const formattedDate = dateObj.getFullYear() + "-" + month + "-" + day;
                   element.value = formattedDate;
@@ -110,14 +106,14 @@ export default function HomePage() {
       });
   };
 
-  // Hàm cập nhật bản ghi sau khi chỉnh sửa
+  // Update record function
   const updateRecord = () => {
     if (!formRef.current) return;
     const form = formRef.current;
     const formData = new FormData(form);
     formData.append("mode", "update");
     const formDataString = formDataToQueryString(formData);
-    // Cập nhật endpointUrlUpdate theo dịch vụ của bạn
+    // Update endpointUrlUpdate to your actual endpoint
     const endpointUrlUpdate =
       "https://script.google.com/macros/s/AKfycbxQRQgb2DGZpOly9_wV1jHK_I8U0g_p2n_r8WkX7DsSyrabRDNPx1C7eQyDS-v2OPVZCg/exec";
     fetch(endpointUrlUpdate, {
@@ -126,7 +122,7 @@ export default function HomePage() {
       headers: { "Content-Type": "text/plain;charset=utf-8" },
     })
       .then((response) => response.text())
-      .then((data) => {
+      .then(() => {
         if (messageRef.current) {
           messageRef.current.style.display = "block";
           messageRef.current.textContent = "Cập nhật dữ liệu thành công!";
@@ -143,14 +139,14 @@ export default function HomePage() {
       });
   };
 
-  // Hàm tạo bản ghi mới (Create) – gửi dữ liệu với mode=create
+  // Create record function
   const createRecord = () => {
     if (!formRef.current) return;
     const form = formRef.current;
     const formData = new FormData(form);
     formData.append("mode", "create");
     const formDataString = formDataToQueryString(formData);
-    // Cập nhật endpointUrlCreate theo dịch vụ của bạn (ở đây dùng cùng URL với appendRow)
+    // Update endpointUrlCreate to your actual endpoint (using same endpoint as create/append)
     const endpointUrlCreate =
       "https://script.google.com/macros/s/AKfycbxQRQgb2DGZpOly9_wV1jHK_I8U0g_p2n_r8WkX7DsSyrabRDNPx1C7eQyDS-v2OPVZCg/exec";
     fetch(endpointUrlCreate, {
@@ -159,7 +155,7 @@ export default function HomePage() {
       headers: { "Content-Type": "text/plain;charset=utf-8" },
     })
       .then((response) => response.text())
-      .then((data) => {
+      .then(() => {
         if (messageRef.current) {
           messageRef.current.style.display = "block";
           messageRef.current.textContent = "Tạo bản ghi thành công!";
@@ -351,7 +347,9 @@ export default function HomePage() {
                 <i className="bi bi-geo-alt"></i>
               </button>
             </div>
-            <p className="help">Nhấn nút để lấy vị trí và tạo link Google Maps</p>
+            <p className="help">
+              Nhấn nút để lấy vị trí và tạo link Google Maps
+            </p>
             <div className="control">
               <button
                 type="button"
