@@ -72,25 +72,28 @@ export default function HomePage() {
       .then((data) => {
         if (data) {
           for (const key in data) {
-            if (data.hasOwnProperty(key) && form.elements[key]) {
-              const element = form.elements[key] as
-                | HTMLInputElement
-                | HTMLSelectElement;
-              if (key === "NĂM SINH") {
-                const dateObj = new Date(data[key]);
-                if (!isNaN(dateObj.getTime())) {
-                  const month = (dateObj.getMonth() + 1)
-                    .toString()
-                    .padStart(2, "0");
-                  const day = dateObj.getDate().toString().padStart(2, "0");
-                  const formattedDate =
-                    dateObj.getFullYear() + "-" + month + "-" + day;
-                  element.value = formattedDate;
+            if (data.hasOwnProperty(key)) {
+              const formElement = form.elements.namedItem(key);
+              if (formElement) {
+                const element = formElement as
+                  | HTMLInputElement
+                  | HTMLSelectElement;
+                if (key === "NĂM SINH") {
+                  const dateObj = new Date(data[key]);
+                  if (!isNaN(dateObj.getTime())) {
+                    const month = (dateObj.getMonth() + 1)
+                      .toString()
+                      .padStart(2, "0");
+                    const day = dateObj.getDate().toString().padStart(2, "0");
+                    const formattedDate =
+                      dateObj.getFullYear() + "-" + month + "-" + day;
+                    element.value = formattedDate;
+                  } else {
+                    element.value = "";
+                  }
                 } else {
-                  element.value = "";
+                  element.value = data[key];
                 }
-              } else {
-                element.value = data[key];
               }
             }
           }
