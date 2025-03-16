@@ -55,7 +55,9 @@ export default function HomePage() {
     if (!formRef.current) return;
     const form = formRef.current;
     // Use namedItem to safely access the form element
-    const soCanCuoc = (form.elements.namedItem("SỐ CĂN CƯỚC") as HTMLInputElement).value;
+    const soCanCuoc = (
+      form.elements.namedItem("SỐ CĂN CƯỚC") as HTMLInputElement
+    ).value;
     if (!soCanCuoc) {
       alert("Vui lòng nhập SỐ CĂN CƯỚC để tìm kiếm.");
       return;
@@ -71,13 +73,18 @@ export default function HomePage() {
         if (data) {
           for (let key in data) {
             if (data.hasOwnProperty(key) && form.elements[key]) {
-              const element = form.elements[key] as HTMLInputElement | HTMLSelectElement;
+              const element = form.elements[key] as
+                | HTMLInputElement
+                | HTMLSelectElement;
               if (key === "NĂM SINH") {
                 const dateObj = new Date(data[key]);
                 if (!isNaN(dateObj.getTime())) {
-                  const month = (dateObj.getMonth() + 1).toString().padStart(2, "0");
+                  const month = (dateObj.getMonth() + 1)
+                    .toString()
+                    .padStart(2, "0");
                   const day = dateObj.getDate().toString().padStart(2, "0");
-                  const formattedDate = dateObj.getFullYear() + "-" + month + "-" + day;
+                  const formattedDate =
+                    dateObj.getFullYear() + "-" + month + "-" + day;
                   element.value = formattedDate;
                 } else {
                   element.value = "";
