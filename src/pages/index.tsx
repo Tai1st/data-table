@@ -7,7 +7,7 @@ export default function HomePage() {
   const locationInputRef = useRef<HTMLInputElement>(null);
   const messageRef = useRef<HTMLDivElement>(null);
 
-  // Hàm lấy vị trí với enableHighAccuracy
+  // Hàm lấy vị trí qua Geolocation của trình duyệt
   const getLocation = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -29,7 +29,7 @@ export default function HomePage() {
     }
   };
 
-  // Hàm mở link từ ô VỊ TRÍ MAP trong cửa sổ mới
+  // Hàm mở link vị trí từ ô VỊ TRÍ MAP
   const openLocationLink = () => {
     const link = locationInputRef.current?.value;
     if (link && link.startsWith("http")) {
@@ -43,9 +43,10 @@ export default function HomePage() {
   const formDataToQueryString = (formData: FormData): string => {
     const keyValuePairs: string[] = [];
     for (let pair of formData.entries()) {
-      // pair[1] có thể là File, nên ép về string
       keyValuePairs.push(
-        encodeURIComponent(pair[0]) + "=" + encodeURIComponent(String(pair[1]))
+        encodeURIComponent(pair[0]) +
+          "=" +
+          encodeURIComponent(String(pair[1]))
       );
     }
     return keyValuePairs.join("&");
@@ -69,14 +70,16 @@ export default function HomePage() {
       .then((response) => response.json())
       .then((data) => {
         if (data) {
-          // Điền dữ liệu vào form, chuyển đổi NĂM SINH sang định dạng YYYY-MM-DD nếu cần
+          // Điền dữ liệu vào form, chuyển đổi "NĂM SINH" sang định dạng YYYY-MM-DD nếu cần
           for (let key in data) {
             if (data.hasOwnProperty(key) && form.elements[key]) {
               const element = form.elements[key] as HTMLInputElement | HTMLSelectElement;
               if (key === "NĂM SINH") {
                 const dateObj = new Date(data[key]);
                 if (!isNaN(dateObj.getTime())) {
-                  const month = (dateObj.getMonth() + 1).toString().padStart(2, "0");
+                  const month = (dateObj.getMonth() + 1)
+                    .toString()
+                    .padStart(2, "0");
                   const day = dateObj.getDate().toString().padStart(2, "0");
                   const formattedDate = dateObj.getFullYear() + "-" + month + "-" + day;
                   element.value = formattedDate;
@@ -137,6 +140,39 @@ export default function HomePage() {
       .catch((error) => {
         console.error("Error:", error);
         alert("Đã xảy ra lỗi khi cập nhật dữ liệu!");
+      });
+  };
+
+  // Hàm tạo bản ghi mới (Create) – gửi dữ liệu với mode=create
+  const createRecord = () => {
+    if (!formRef.current) return;
+    const form = formRef.current;
+    const formData = new FormData(form);
+    formData.append("mode", "create");
+    const formDataString = formDataToQueryString(formData);
+    // Cập nhật endpointUrlCreate theo dịch vụ của bạn (ở đây dùng cùng URL với appendRow)
+    const endpointUrlCreate =
+      "https://script.google.com/macros/s/AKfycbxQRQgb2DGZpOly9_wV1jHK_I8U0g_p2n_r8WkX7DsSyrabRDNPx1C7eQyDS-v2OPVZCg/exec";
+    fetch(endpointUrlCreate, {
+      method: "POST",
+      body: formDataString,
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+    })
+      .then((response) => response.text())
+      .then((data) => {
+        if (messageRef.current) {
+          messageRef.current.style.display = "block";
+          messageRef.current.textContent = "Tạo bản ghi thành công!";
+          setTimeout(() => {
+            if (messageRef.current) {
+              messageRef.current.style.display = "none";
+            }
+          }, 2000);
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        alert("Đã xảy ra lỗi khi tạo bản ghi!");
       });
   };
 
@@ -326,8 +362,17 @@ export default function HomePage() {
               </button>
             </div>
           </div>
-          {/* NÚT UPDATE & CANCEL */}
+          {/* NÚT CREATE, UPDATE & CANCEL */}
           <div className="field is-grouped">
+            <div className="control">
+              <button
+                className="button is-success"
+                type="button"
+                onClick={createRecord}
+              >
+                Create
+              </button>
+            </div>
             <div className="control">
               <button
                 className="button is-primary"
