@@ -1,11 +1,11 @@
-// pages/index.js
+// pages/index.tsx
 import { useRef } from "react";
 import Head from "next/head";
 
 export default function HomePage() {
-  const formRef = useRef(null);
-  const locationInputRef = useRef(null);
-  const messageRef = useRef(null);
+  const formRef = useRef<HTMLFormElement>(null);
+  const locationInputRef = useRef<HTMLInputElement>(null);
+  const messageRef = useRef<HTMLDivElement>(null);
 
   // Hàm lấy vị trí với enableHighAccuracy
   const getLocation = () => {
@@ -40,11 +40,12 @@ export default function HomePage() {
   };
 
   // Hàm chuyển đổi FormData thành chuỗi URL-encoded
-  const formDataToQueryString = (formData) => {
-    const keyValuePairs = [];
+  const formDataToQueryString = (formData: FormData): string => {
+    const keyValuePairs: string[] = [];
     for (let pair of formData.entries()) {
+      // pair[1] có thể là File, nên ép về string
       keyValuePairs.push(
-        encodeURIComponent(pair[0]) + "=" + encodeURIComponent(pair[1])
+        encodeURIComponent(pair[0]) + "=" + encodeURIComponent(String(pair[1]))
       );
     }
     return keyValuePairs.join("&");
@@ -52,13 +53,14 @@ export default function HomePage() {
 
   // Hàm tìm kiếm bản ghi dựa trên SỐ CĂN CƯỚC
   const searchRecord = () => {
+    if (!formRef.current) return;
     const form = formRef.current;
-    const soCanCuoc = form.elements["SỐ CĂN CƯỚC"].value;
+    const soCanCuoc = (form.elements["SỐ CĂN CƯỚC"] as HTMLInputElement).value;
     if (!soCanCuoc) {
       alert("Vui lòng nhập SỐ CĂN CƯỚC để tìm kiếm.");
       return;
     }
-    // Thay đổi endpointUrlSearch theo dịch vụ của bạn
+    // Cập nhật endpointUrlSearch theo dịch vụ của bạn
     const endpointUrlSearch =
       "https://script.google.com/macros/s/AKfycbxQRQgb2DGZpOly9_wV1jHK_I8U0g_p2n_r8WkX7DsSyrabRDNPx1C7eQyDS-v2OPVZCg/exec";
     const params =
@@ -70,16 +72,13 @@ export default function HomePage() {
           // Điền dữ liệu vào form, chuyển đổi NĂM SINH sang định dạng YYYY-MM-DD nếu cần
           for (let key in data) {
             if (data.hasOwnProperty(key) && form.elements[key]) {
-              const element = form.elements[key];
+              const element = form.elements[key] as HTMLInputElement | HTMLSelectElement;
               if (key === "NĂM SINH") {
                 const dateObj = new Date(data[key]);
                 if (!isNaN(dateObj.getTime())) {
-                  const month = (dateObj.getMonth() + 1)
-                    .toString()
-                    .padStart(2, "0");
+                  const month = (dateObj.getMonth() + 1).toString().padStart(2, "0");
                   const day = dateObj.getDate().toString().padStart(2, "0");
-                  const formattedDate =
-                    dateObj.getFullYear() + "-" + month + "-" + day;
+                  const formattedDate = dateObj.getFullYear() + "-" + month + "-" + day;
                   element.value = formattedDate;
                 } else {
                   element.value = "";
@@ -93,7 +92,9 @@ export default function HomePage() {
             messageRef.current.style.display = "block";
             messageRef.current.textContent = "Tìm thấy bản ghi.";
             setTimeout(() => {
-              messageRef.current.style.display = "none";
+              if (messageRef.current) {
+                messageRef.current.style.display = "none";
+              }
             }, 2000);
           }
         } else {
@@ -108,11 +109,12 @@ export default function HomePage() {
 
   // Hàm cập nhật bản ghi sau khi chỉnh sửa
   const updateRecord = () => {
+    if (!formRef.current) return;
     const form = formRef.current;
     const formData = new FormData(form);
     formData.append("mode", "update");
     const formDataString = formDataToQueryString(formData);
-    // Thay đổi endpointUrlUpdate theo dịch vụ của bạn
+    // Cập nhật endpointUrlUpdate theo dịch vụ của bạn
     const endpointUrlUpdate =
       "https://script.google.com/macros/s/AKfycbxQRQgb2DGZpOly9_wV1jHK_I8U0g_p2n_r8WkX7DsSyrabRDNPx1C7eQyDS-v2OPVZCg/exec";
     fetch(endpointUrlUpdate, {
@@ -126,7 +128,9 @@ export default function HomePage() {
           messageRef.current.style.display = "block";
           messageRef.current.textContent = "Cập nhật dữ liệu thành công!";
           setTimeout(() => {
-            messageRef.current.style.display = "none";
+            if (messageRef.current) {
+              messageRef.current.style.display = "none";
+            }
           }, 2000);
         }
       })
@@ -165,7 +169,7 @@ export default function HomePage() {
         }}
       >
         <form id="registration-form" ref={formRef}>
-          {/* SỐ CĂN CƯỚC (khóa tìm kiếm) */}
+          {/* SỐ CĂN CƯỚC */}
           <div className="field">
             <label className="label">SỐ CĂN CƯỚC</label>
             <div className="control input-container">
@@ -200,11 +204,7 @@ export default function HomePage() {
           <div className="field">
             <label className="label">NĂM SINH</label>
             <div className="control">
-              <input
-                className="input"
-                type="date"
-                name="NĂM SINH"
-              />
+              <input className="input" type="date" name="NĂM SINH" />
             </div>
           </div>
           {/* GIỚI TÍNH */}
@@ -243,7 +243,7 @@ export default function HomePage() {
               />
             </div>
           </div>
-          {/* THÔN (select) */}
+          {/* THÔN */}
           <div className="field">
             <label className="label">THÔN</label>
             <div className="control">
@@ -342,7 +342,7 @@ export default function HomePage() {
               <button
                 className="button is-danger"
                 type="button"
-                onClick={() => formRef.current.reset()}
+                onClick={() => formRef.current?.reset()}
               >
                 Cancel
               </button>
