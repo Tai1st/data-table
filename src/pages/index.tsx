@@ -42,7 +42,7 @@ export default function HomePage() {
   // Converts FormData to URL-encoded query string
   const formDataToQueryString = (formData: FormData): string => {
     const keyValuePairs: string[] = [];
-    for (let pair of formData.entries()) {
+    for (const pair of formData.entries()) {
       keyValuePairs.push(
         encodeURIComponent(pair[0]) + "=" + encodeURIComponent(String(pair[1]))
       );
@@ -71,7 +71,7 @@ export default function HomePage() {
       .then((response) => response.json())
       .then((data) => {
         if (data) {
-          for (let key in data) {
+          for (const key in data) {
             if (data.hasOwnProperty(key) && form.elements[key]) {
               const element = form.elements[key] as
                 | HTMLInputElement
